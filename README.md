@@ -1,16 +1,12 @@
-# Space Station AR Maintenance Assistant
+# Cross-Platform AR Object Spotter
 
-This project provides a prototype for an augmented-reality maintenance
-helper. A YOLOv8 object detector runs on a PC and communicates with a
-mobile AR application. The phone streams camera frames to the PC where
-object detection is performed. Detected items are sent back to the phone
-and rendered as overlays.
+This project is a starting point for an Unreal Engine application that streams camera frames to a YOLOv8 server. The Python service runs on an Ubuntu machine with ROCm GPU acceleration and returns bounding boxes that the client overlays in real time.
 
 ## Components
 
-* `server/` – Python WebSocket service running YOLOv8 inference.
-* `mobile/` – Example Unity script for drawing bounding boxes.
-* `requirements.txt` – Python package list for the PC server.
+* `server/` – FastAPI WebSocket service running YOLOv8 inference.
+* `unreal/` – Example files for integrating detection results inside Unreal Engine.
+* `requirements.txt` – Python package list for the server environment.
 
 ## Quick start
 
@@ -20,7 +16,8 @@ and rendered as overlays.
    ```
 2. Run the detection server:
    ```bash
-   python server/server.py
+   uvicorn server.fastapi_server:app --host 0.0.0.0 --port 8000
    ```
-3. Build a Unity mobile app that sends frames over WebSocket and uses
-   `AROverlay` to display results.
+3. Build the Unreal project for Android or Windows and send JPEG frames to `/detect`.
+
+Place your training dataset under `server/data/` with a `data.yaml` file. The files `server/train.py` and `server/predict.py` are empty placeholders where you can add your own training and evaluation code.

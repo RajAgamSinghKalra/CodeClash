@@ -5,7 +5,7 @@ import numpy as np
 import base64
 
 app = FastAPI()
-model = YOLO("best.pt")  # your trained checkpoint
+model = YOLO("/home/agam/Downloads/codeclash/git/server/best.pt")  # your trained checkpoint
 
 @app.websocket("/detect")
 async def detect(ws: WebSocket):

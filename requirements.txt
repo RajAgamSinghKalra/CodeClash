@@ -7,11 +7,8 @@ torchaudio==2.1.0+rocm5.6
 ultralytics==8.0.204  # YOLOv8 official package
 
 # Web backend
-flask==2.3.3
-flask-cors==4.0.0
-
-# Real-time WebSocket communication
-websockets==12.0
+fastapi==0.111.0
+uvicorn==0.29.0
 
 # Image processing
 opencv-python==4.9.0.80

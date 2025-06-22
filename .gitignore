@@ -2,3 +2,5 @@ __pycache__/
 server/data/*
 server/data/*
 !server/data/.gitkeep
+server/data/*
+!server/data/.gitkeep

@@ -4,3 +4,4 @@ server/data/*
 !server/data/.gitkeep
 server/data/*
 !server/data/.gitkeep
+server/data/

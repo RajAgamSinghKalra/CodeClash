@@ -3,6 +3,7 @@ from fastapi import FastAPI, WebSocket, UploadFile, File
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from ultralytics import YOLO
+import torch
 import cv2
 import numpy as np
 import base64
@@ -22,8 +23,10 @@ async def get_index():
         index_path = WEB_DIR / "frontend" / "public" / "index.html"
     return FileResponse(index_path)
 
+DEVICE = 0 if torch.cuda.is_available() else "cpu"
 model = YOLO(str(MODEL_PATH))
-DEVICE = "cpu"
+if DEVICE != "cpu":
+    model.to(DEVICE)
 
 @app.post("/api/detect")
 async def api_detect(file: UploadFile = File(...)):

@@ -10,14 +10,16 @@ This project provides a simple FastAPI backend that performs object detection wi
 
 ## Quick start
 
-1. Install Python packages:
+1. Install Python packages (replace the ROCm version if needed):
    ```bash
+   pip install torch==2.5.1+rocm6.2 torchvision==0.18.1+rocm6.2 torchaudio==2.5.1+rocm6.2 --index-url https://download.pytorch.org/whl/rocm6.2
    pip install -r requirements.txt
    ```
-2. Start the server (uses the bundled `best.pt` and runs on CPU by default):
+2. Start the server (uses the bundled `best.pt` and automatically selects your GPU if available):
    ```bash
    uvicorn server.fastapi_server:app --host 0.0.0.0 --port 8000
    ```
+   The server loads `server/best.pt` at startup and uses GPU `0` when `torch.cuda.is_available()` reports a compatible ROCm device.
 3. Open `http://<server-ip>:8000` in your browser and upload an image to test detection.
 
 4. (Optional) Run the React frontend in development mode. From `web/frontend`:

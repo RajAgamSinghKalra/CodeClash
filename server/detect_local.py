@@ -18,8 +18,8 @@ from ultralytics import YOLO
 MODEL_PATH = Path(__file__).with_name("best.pt")
 
 
-def run_detection(img_path: Path, out_path: Path | None = None, device: int = 0):
-    """Run YOLOv8 on ``img_path`` using ``device`` (0=GPU) and optionally save."""
+def run_detection(img_path: Path, out_path: Path | None = None, device: int = -1):
+    """Run YOLOv8 on ``img_path`` using ``device`` (CPU=-1, GPU=0) and optionally save."""
     model = YOLO(str(MODEL_PATH))
     result = model.predict(source=str(img_path), device=device, conf=0.25, verbose=False)[0]
 
@@ -38,7 +38,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run YOLOv8 on a single image")
     parser.add_argument("image", type=Path, help="Path to image file")
     parser.add_argument("-o", "--output", type=Path, help="Optional output image")
-    parser.add_argument("--device", type=int, default=0, help="Device index for inference (GPU=0, CPU=-1)")
+    parser.add_argument("--device", type=int, default=-1, help="Device index for inference (CPU=-1, GPU=0)")
     args = parser.parse_args()
 
     run_detection(args.image, args.output, args.device)

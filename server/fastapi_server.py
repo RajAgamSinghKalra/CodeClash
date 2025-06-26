@@ -17,15 +17,19 @@ app.mount("/static", StaticFiles(directory=WEB_DIR), name="static")
 
 @app.get("/")
 async def get_index():
-    return FileResponse(WEB_DIR / "index.html")
+    index_path = WEB_DIR / "index.html"
+    if not index_path.is_file():
+        index_path = WEB_DIR / "frontend" / "public" / "index.html"
+    return FileResponse(index_path)
 
 model = YOLO(str(MODEL_PATH))
+DEVICE = "cpu"
 
 @app.post("/api/detect")
 async def api_detect(file: UploadFile = File(...)):
     data = await file.read()
     img = cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR)
-    res = model.predict(img, conf=0.25, verbose=False)[0]
+    res = model.predict(img, conf=0.25, verbose=False, device=DEVICE)[0]
     detections = [
         {
             "cls": int(b.cls),
@@ -45,7 +49,7 @@ async def ws_detect(ws: WebSocket):
         jpg_b64 = await ws.receive_text()
         jpg = base64.b64decode(jpg_b64)
         img = cv2.imdecode(np.frombuffer(jpg, np.uint8), cv2.IMREAD_COLOR)
-        res = model.predict(img, conf=0.25, verbose=False)[0]
+        res = model.predict(img, conf=0.25, verbose=False, device=DEVICE)[0]
         detections = [
             {
                 "cls": int(b.cls),

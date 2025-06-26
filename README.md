@@ -14,7 +14,7 @@ This project provides a simple FastAPI backend that performs object detection wi
    ```bash
    pip install -r requirements.txt
    ```
-2. Start the server:
+2. Start the server (uses the bundled `best.pt` and runs on CPU by default):
    ```bash
    uvicorn server.fastapi_server:app --host 0.0.0.0 --port 8000
    ```
@@ -27,6 +27,12 @@ This project provides a simple FastAPI backend that performs object detection wi
    ```
 
    The app will open at `http://localhost:3000` and connect to the FastAPI backend for live detection.
+
+   To create a production build served by FastAPI, run:
+   ```bash
+   yarn build
+   cp -r build/* ..
+   ```
 
 Place your training dataset under `server/data/` with a `data.yaml` file. The files `server/train.py` and `server/predict.py` contain example scripts you can adapt for training and evaluation on your ROCm GPU.
 

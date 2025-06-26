@@ -1,32 +1,49 @@
-from fastapi import FastAPI, APIRouter
-from dotenv import load_dotenv
-from starlette.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
-import os
+from __future__ import annotations
+
+import base64
+import json
 import logging
-from pathlib import Path
-from pydantic import BaseModel, Field
-from typing import List
+import os
 import uuid
 from datetime import datetime
+from pathlib import Path
+from typing import List
 
+import cv2
+import numpy as np
+from dotenv import load_dotenv
+from fastapi import APIRouter, FastAPI, File, UploadFile, WebSocket
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+from motor.motor_asyncio import AsyncIOMotorClient
+from pydantic import BaseModel, Field
+from starlette.middleware.cors import CORSMiddleware
+from ultralytics import YOLO
 
-ROOT_DIR = Path(__file__).parent
-load_dotenv(ROOT_DIR / '.env')
+# --- Paths and environment ----------------------------------------------------
+REPO_ROOT = Path(__file__).resolve().parents[1]
+WEB_DIR = REPO_ROOT / "web"
+MODEL_PATH = REPO_ROOT / "server" / "best.pt"
+load_dotenv(REPO_ROOT / ".env")
 
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
+# --- Database ----------------------------------------------------------------
+mongo_url = os.getenv("MONGO_URL", "mongodb://localhost:27017")
 client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+db = client[os.getenv("DB_NAME", "codeclash")]
 
-# Create the main app without a prefix
-app = FastAPI()
+# --- FastAPI setup ------------------------------------------------------------
+app = FastAPI(title="CodeClash API")
+api = APIRouter(prefix="/api")
 
-# Create a router with the /api prefix
-api_router = APIRouter(prefix="/api")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-
-# Define Models
+# --- Pydantic models ----------------------------------------------------------
 class StatusCheck(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     client_name: str
@@ -35,41 +52,90 @@ class StatusCheck(BaseModel):
 class StatusCheckCreate(BaseModel):
     client_name: str
 
-# Add your routes to the router instead of directly to app
-@api_router.get("/")
-async def root():
+# --- REST routes --------------------------------------------------------------
+@api.get("/")
+async def root() -> dict[str, str]:
     return {"message": "Hello World"}
 
-@api_router.post("/status", response_model=StatusCheck)
-async def create_status_check(input: StatusCheckCreate):
-    status_dict = input.dict()
-    status_obj = StatusCheck(**status_dict)
-    _ = await db.status_checks.insert_one(status_obj.dict())
-    return status_obj
+@api.post("/status", response_model=StatusCheck)
+async def create_status_check(body: StatusCheckCreate) -> StatusCheck:
+    doc = StatusCheck(**body.dict())
+    await db.status_checks.insert_one(doc.dict())
+    return doc
 
-@api_router.get("/status", response_model=List[StatusCheck])
-async def get_status_checks():
-    status_checks = await db.status_checks.find().to_list(1000)
-    return [StatusCheck(**status_check) for status_check in status_checks]
+@api.get("/status", response_model=List[StatusCheck])
+async def get_status_checks() -> List[StatusCheck]:
+    cursor = db.status_checks.find()
+    return [StatusCheck(**d) async for d in cursor]
 
-# Include the router in the main app
-app.include_router(api_router)
+# --- YOLOv8 model -------------------------------------------------------------
+yolo = YOLO(str(MODEL_PATH))
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+@api.post("/detect")
+async def api_detect(file: UploadFile = File(...)) -> dict[str, List[dict]]:
+    data = await file.read()
+    img = cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR)
+    res = yolo.predict(img, verbose=False)[0]
+    dets = [
+        {
+            "bbox": list(map(int, xyxy)),
+            "conf": round(float(conf), 4),
+            "cls": int(cls),
+        }
+        for xyxy, conf, cls in zip(
+            res.boxes.xyxy.cpu().numpy(),
+            res.boxes.conf.cpu().numpy(),
+            res.boxes.cls.cpu().numpy(),
+        )
+    ]
+    return {"detections": dets}
 
-# Configure logging
+# --- WebSocket: /ws -----------------------------------------------------------
+@app.websocket("/ws")
+async def detect_stream(ws: WebSocket) -> None:
+    await ws.accept()
+    try:
+        while True:
+            b64 = await ws.receive_text()
+            img_np = cv2.imdecode(
+                np.frombuffer(base64.b64decode(b64), np.uint8), cv2.IMREAD_COLOR
+            )
+            res = yolo.predict(img_np, verbose=False)[0]
+            dets = [
+                {
+                    "bbox": list(map(int, xyxy)),
+                    "conf": round(float(conf), 4),
+                    "cls": int(cls),
+                }
+                for xyxy, conf, cls in zip(
+                    res.boxes.xyxy.cpu().numpy(),
+                    res.boxes.conf.cpu().numpy(),
+                    res.boxes.cls.cpu().numpy(),
+                )
+            ]
+            await ws.send_text(json.dumps(dets))
+    except Exception:
+        await ws.close()
+
+# --- Static files -------------------------------------------------------------
+if WEB_DIR.exists():
+    app.mount("/static", StaticFiles(directory=WEB_DIR), name="static")
+
+    @app.get("/")
+    async def get_index() -> FileResponse:
+        return FileResponse(WEB_DIR / "index.html")
+
+# --- Attach router and shutdown ----------------------------------------------
+app.include_router(api)
+
+@app.on_event("shutdown")
+async def _shutdown() -> None:
+    client.close()
+
+# --- Logging -----------------------------------------------------------------
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
 )
 logger = logging.getLogger(__name__)
 
-@app.on_event("shutdown")
-async def shutdown_db_client():
-    client.close()

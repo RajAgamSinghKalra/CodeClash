@@ -154,7 +154,7 @@ const DetectionConsole = () => {
       }
 
       // WebSocket connection
-      const wsUrl = BACKEND_URL.replace('https://', 'wss://').replace('http://', 'ws://') + '/detect';
+      const wsUrl = BACKEND_URL.replace('https://', 'wss://').replace('http://', 'ws://') + '/ws';
       wsRef.current = new WebSocket(wsUrl);
       
       wsRef.current.onopen = () => {

@@ -20,6 +20,14 @@ This project provides a simple FastAPI backend that performs object detection wi
    ```
 3. Open `http://<server-ip>:8000` in your browser and upload an image to test detection.
 
+4. (Optional) Run the React frontend in development mode. From `web/frontend`:
+   ```bash
+   yarn install
+   REACT_APP_BACKEND_URL=http://localhost:8000 yarn start
+   ```
+
+   The app will open at `http://localhost:3000` and connect to the FastAPI backend for live detection.
+
 Place your training dataset under `server/data/` with a `data.yaml` file. The files `server/train.py` and `server/predict.py` contain example scripts you can adapt for training and evaluation on your ROCm GPU.
 
 ## Offline GPU inference

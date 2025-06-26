@@ -1,19 +1,14 @@
 # YOLOv8 Detection Server
 
-This folder contains a FastAPI WebSocket server that runs YOLOv8 object detection. Clients send base64-encoded JPEG images and receive detection results as JSON.
+This directory contains the FastAPI backend that performs object detection. When started with `uvicorn`, the server also serves the website located in `../web`.
 
 ## Usage
 
-Install dependencies from the project root:
+Install dependencies from the project root and run the server:
 
 ```bash
 pip install -r requirements.txt
-```
-
-Run the server (downloads YOLOv8 weights on first launch):
-
-```bash
 uvicorn server.fastapi_server:app --host 0.0.0.0 --port 8000
 ```
 
-The server exposes a WebSocket endpoint at `/detect`. Send a base64 JPEG string and you will receive a JSON array of detections with class IDs and pixel coordinates.
+Open `http://<server-ip>:8000` in a browser. The `/api/detect` endpoint accepts image uploads via POST and `/ws` provides a WebSocket interface for real-time streaming.

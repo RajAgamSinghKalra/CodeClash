@@ -29,3 +29,4 @@ psutil==5.9.8
 # Async server utilities (for high performance)
 aiohttp==3.9.5
 aiofiles==23.2.1
+python-multipart==0.0.9

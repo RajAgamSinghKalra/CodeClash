@@ -21,3 +21,15 @@ This project provides a simple FastAPI backend that performs object detection wi
 3. Open `http://<server-ip>:8000` in your browser and upload an image to test detection.
 
 Place your training dataset under `server/data/` with a `data.yaml` file. The files `server/train.py` and `server/predict.py` contain example scripts you can adapt for training and evaluation on your ROCm GPU.
+
+## Offline GPU inference
+
+If you want to run the trained model locally without starting the FastAPI server,
+use the helper script `server/detect_local.py`. It performs detection on a single
+image using your GPU and optionally saves the annotated result.
+
+```bash
+python server/detect_local.py path/to/image.jpg -o output.jpg
+```
+
+Use `--device -1` to run on CPU if a GPU is not available.

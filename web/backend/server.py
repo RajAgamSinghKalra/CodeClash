@@ -19,6 +19,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field
 from starlette.middleware.cors import CORSMiddleware
 from ultralytics import YOLO
+import torch
 
 # --- Paths and environment ----------------------------------------------------
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -69,13 +70,16 @@ async def get_status_checks() -> List[StatusCheck]:
     return [StatusCheck(**d) async for d in cursor]
 
 # --- YOLOv8 model -------------------------------------------------------------
+yolo_device = 0 if torch.cuda.is_available() else "cpu"
 yolo = YOLO(str(MODEL_PATH))
+if yolo_device != "cpu":
+    yolo.to(yolo_device)
 
 @api.post("/detect")
 async def api_detect(file: UploadFile = File(...)) -> dict[str, List[dict]]:
     data = await file.read()
     img = cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR)
-    res = yolo.predict(img, verbose=False)[0]
+    res = yolo.predict(img, verbose=False, device=yolo_device)[0]
     dets = [
         {
             "bbox": list(map(int, xyxy)),
@@ -100,7 +104,7 @@ async def detect_stream(ws: WebSocket) -> None:
             img_np = cv2.imdecode(
                 np.frombuffer(base64.b64decode(b64), np.uint8), cv2.IMREAD_COLOR
             )
-            res = yolo.predict(img_np, verbose=False)[0]
+            res = yolo.predict(img_np, verbose=False, device=yolo_device)[0]
             dets = [
                 {
                     "bbox": list(map(int, xyxy)),

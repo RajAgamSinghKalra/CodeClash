@@ -1,7 +1,7 @@
 # Core YOLOv8 + PyTorch with ROCm support
-torch==2.1.0+cu118
-torchvision==0.16.0+cu118
-torchaudio==2.1.0+cu118
+torch==2.5.1+rocm6.2
+torchvision==0.18.1+rocm6.2
+torchaudio==2.5.1+rocm6.2
 
 # Object Detection
 ultralytics==8.0.204  # YOLOv8 official package

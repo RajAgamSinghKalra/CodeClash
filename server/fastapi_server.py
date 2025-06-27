@@ -37,14 +37,7 @@ def create_app() -> FastAPI:
             index_path = WEB_DIR / "frontend" / "public" / "index.html"
         return FileResponse(index_path)
 
-    model = YOLO(str(MODEL_PATH))
-    if DEVICE != "cpu":
-        model.to(DEVICE)
 
-    @app.post("/api/detect")
-    async def api_detect(file: UploadFile = File(...)) -> dict:
-        data = await file.read()
-        img = cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR)
         res = model.predict(img, conf=0.25, verbose=False, device=DEVICE)[0]
         detections = [
             {
@@ -56,32 +49,4 @@ def create_app() -> FastAPI:
             }
             for b in res.boxes
         ]
-        return {"detections": detections}
 
-    @app.websocket("/ws")
-    async def ws_detect(ws: WebSocket) -> None:
-        await ws.accept()
-        while True:
-            data = await ws.receive_text()
-            header, b64 = data.split(",", 1) if "," in data else ("", data)
-            jpg = base64.b64decode(b64)
-            img = cv2.imdecode(np.frombuffer(jpg, np.uint8), cv2.IMREAD_COLOR)
-            res = model.predict(img, conf=0.25, verbose=False, device=DEVICE)[0]
-            detections = [
-                {
-                    "cls": int(b.cls),
-                    "x1": float(b.xyxy[0][0]),
-                    "y1": float(b.xyxy[0][1]),
-                    "x2": float(b.xyxy[0][2]),
-                    "y2": float(b.xyxy[0][3]),
-                }
-                for b in res.boxes
-            ]
-            await ws.send_json(detections)
-            await asyncio.sleep(0.066)
-
-    return app
-
-
-app = create_app()
-__all__ = ["app"]

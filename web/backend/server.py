@@ -9,6 +9,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import List
 
+import asyncio
+
 import cv2
 import numpy as np
 from dotenv import load_dotenv
@@ -100,14 +102,18 @@ async def detect_stream(ws: WebSocket) -> None:
     await ws.accept()
     try:
         while True:
-            b64 = await ws.receive_text()
+            data = await ws.receive_text()
+            header, b64 = data.split(",", 1) if "," in data else ("", data)
             img_np = cv2.imdecode(
                 np.frombuffer(base64.b64decode(b64), np.uint8), cv2.IMREAD_COLOR
             )
             res = yolo.predict(img_np, verbose=False, device=yolo_device)[0]
             dets = [
                 {
-                    "bbox": list(map(int, xyxy)),
+                    "x1": int(xyxy[0]),
+                    "y1": int(xyxy[1]),
+                    "x2": int(xyxy[2]),
+                    "y2": int(xyxy[3]),
                     "conf": round(float(conf), 4),
                     "cls": int(cls),
                 }
@@ -118,6 +124,7 @@ async def detect_stream(ws: WebSocket) -> None:
                 )
             ]
             await ws.send_text(json.dumps(dets))
+            await asyncio.sleep(0.066)
     except Exception:
         await ws.close()
 

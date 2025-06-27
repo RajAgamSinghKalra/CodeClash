@@ -7,6 +7,7 @@ import torch
 import cv2
 import numpy as np
 import base64
+import asyncio
 
 # Paths
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -49,8 +50,9 @@ async def api_detect(file: UploadFile = File(...)):
 async def ws_detect(ws: WebSocket):
     await ws.accept()
     while True:
-        jpg_b64 = await ws.receive_text()
-        jpg = base64.b64decode(jpg_b64)
+        data = await ws.receive_text()
+        header, b64 = data.split(",", 1) if "," in data else ("", data)
+        jpg = base64.b64decode(b64)
         img = cv2.imdecode(np.frombuffer(jpg, np.uint8), cv2.IMREAD_COLOR)
         res = model.predict(img, conf=0.25, verbose=False, device=DEVICE)[0]
         detections = [
@@ -64,3 +66,4 @@ async def ws_detect(ws: WebSocket):
             for b in res.boxes
         ]
         await ws.send_json(detections)
+        await asyncio.sleep(0.066)

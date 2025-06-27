@@ -365,6 +365,7 @@ body::before {
   border-radius: 12px;
   border: 2px solid rgba(46, 255, 255, 0.3);
   box-shadow: 0 0 30px rgba(46, 255, 255, 0.2);
+  transform: scaleX(-1);
 }
 
 .detection-overlay {
@@ -373,6 +374,7 @@ body::before {
   left: 2rem;
   pointer-events: none;
   border-radius: 12px;
+  transform: scaleX(-1);
 }
 
 .controls {
@@ -919,6 +921,7 @@ body::before {
   .video-feed {
     width: 100%;
     height: auto;
+    transform: scaleX(-1);
   }
   
   .hero-content h1 {

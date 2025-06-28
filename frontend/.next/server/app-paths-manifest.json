@@ -1,0 +1,12 @@
+{
+  "/api/items/route": "app/api/items/route.js",
+  "/api/uploaded-images/route": "app/api/uploaded-images/route.js",
+  "/api/add-to-inventory/route": "app/api/add-to-inventory/route.js",
+  "/detect/realtime/page": "app/detect/realtime/page.js",
+  "/home/page": "app/home/page.js",
+  "/page": "app/page.js",
+  "/detect/webcam/page": "app/detect/webcam/page.js",
+  "/detect/image/page": "app/detect/image/page.js",
+  "/items/page": "app/items/page.js",
+  "/tech/page": "app/tech/page.js"
+}

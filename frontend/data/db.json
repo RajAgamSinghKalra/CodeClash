@@ -1,0 +1,71 @@
+{
+  "items": [
+    {
+      "id": 1751058889132,
+      "name": "Fire Extinguisher",
+      "quantity": 1
+    },
+    {
+      "id": 1751058889133,
+      "name": "Toolbox",
+      "quantity": 5
+    },
+    {
+      "id": 1751058889134,
+      "name": "Oxygen Tank",
+      "quantity": 1
+    }
+  ],
+  "uploaded_images": [
+    {
+      "id": 1751058883262,
+      "file_name": "000000711.png",
+      "storage_path": "/home/agam/Downloads/old_frontend_full_webtesting-main/webtesting-main/frontend/public/uploads/u4t4bwxzdr_1751058883253.png",
+      "public_url": "/uploads/u4t4bwxzdr_1751058883253.png",
+      "content_type": "image/png",
+      "size_bytes": 3842703,
+      "detection_count": 1,
+      "created_at": "2025-06-27T21:14:43.262Z"
+    },
+    {
+      "id": 1751063851530,
+      "file_name": "000000711.png",
+      "storage_path": "/home/agam/Downloads/old_frontend_full_webtesting-main/webtesting-main/frontend/public/uploads/gu34ofnu8ch_1751063851525.png",
+      "public_url": "/uploads/gu34ofnu8ch_1751063851525.png",
+      "content_type": "image/png",
+      "size_bytes": 3842703,
+      "detection_count": 1,
+      "created_at": "2025-06-27T22:37:31.530Z"
+    },
+    {
+      "id": 1751064629437,
+      "file_name": "000000711.png",
+      "storage_path": "/home/agam/Downloads/old_frontend_full_webtesting-main/webtesting-main/frontend/public/uploads/p47ocfua2lr_1751064629430.png",
+      "public_url": "/uploads/p47ocfua2lr_1751064629430.png",
+      "content_type": "image/png",
+      "size_bytes": 3842703,
+      "detection_count": 1,
+      "created_at": "2025-06-27T22:50:29.437Z"
+    },
+    {
+      "id": 1751064713444,
+      "file_name": "000000823.png",
+      "storage_path": "/home/agam/Downloads/old_frontend_full_webtesting-main/webtesting-main/frontend/public/uploads/02uufmz7vndq_1751064713440.png",
+      "public_url": "/uploads/02uufmz7vndq_1751064713440.png",
+      "content_type": "image/png",
+      "size_bytes": 3509143,
+      "detection_count": 3,
+      "created_at": "2025-06-27T22:51:53.444Z"
+    },
+    {
+      "id": 1751068885039,
+      "file_name": "WIN_20250627_11_37_15_Pro.jpg",
+      "storage_path": "C:\\Users\\Agam\\Downloads\\codeclash\\2ndlast\\finalsite\\webtesting-main\\frontend\\public\\uploads\\n60kr1dfsw_1751068885034.jpg",
+      "public_url": "/uploads/n60kr1dfsw_1751068885034.jpg",
+      "content_type": "image/jpeg",
+      "size_bytes": 141050,
+      "detection_count": 1,
+      "created_at": "2025-06-28T00:01:25.039Z"
+    }
+  ]
+}
